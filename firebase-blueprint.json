@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "Quiz": {
+      "title": "Quiz",
+      "description": "A user-generated quiz configuration.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the quiz."
+        },
+        "creatorName": {
+          "type": "string",
+          "description": "The display name of the quiz creator."
+        },
+        "creatorUid": {
+          "type": "string",
+          "description": "The Firebase Auth UID of the creator."
+        },
+        "templateType": {
+          "type": "string",
+          "enum": ["wordle", "map", "list"],
+          "description": "The type of quiz template used."
+        },
+        "config": {
+          "type": "object",
+          "description": "The specific configuration for the quiz template."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the quiz was published."
+        },
+        "playCount": {
+          "type": "integer",
+          "description": "Number of times the quiz has been played."
+        }
+      },
+      "required": ["title", "creatorName", "creatorUid", "templateType", "config", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile information.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] }
+      },
+      "required": ["displayName", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/published_quizzes/{quizId}": {
+      "schema": "Quiz",
+      "description": "Collection of all published quizzes."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    }
+  }
+}

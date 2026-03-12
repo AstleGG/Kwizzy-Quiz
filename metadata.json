@@ -1,0 +1,5 @@
+{
+  "name": "Kwizzy",
+  "description": "A user-generated quiz platform where you can create, publish, and play custom Wordle, Map, and List quizzes.",
+  "requestFramePermissions": []
+}
