@@ -1,19 +1,37 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './AuthContext';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import App from './App.tsx';
-import './index.css';
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
+import { auth, provider, signInWithPopup, onAuthStateChanged } from "./firebase";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
-  </StrictMode>,
-);
+function App() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+  }, []);
+
+  const loginWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      alert("Logged in as " + auth.currentUser?.displayName);
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  return (
+    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
+      <h1>Kwizzy Quiz</h1>
+      {!user && <button onClick={loginWithGoogle}>Log in with Google</button>}
+      {user && (
+        <>
+          <p>Welcome, {user.displayName}</p>
+          <button onClick={() => alert("Score saved!")}>Save Score</button>
+        </>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")!).render(<App />);
