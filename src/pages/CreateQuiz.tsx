@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { db, addDoc, collection, serverTimestamp } from '../firebase';
 import { QuizTemplate, QuizConfig } from '../types';
-import { Layout, MapPin, List, Grid3X3, ArrowRight, Save, CheckCircle2 } from 'lucide-react';
+import { MapEditor } from '../components/MapEditor';
+import { Layout, MapPin, List, Grid3X3, ArrowRight, Save, CheckCircle2, Globe, Lock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -14,6 +15,7 @@ export const CreateQuiz: React.FC = () => {
   const [title, setTitle] = useState('');
   const [template, setTemplate] = useState<QuizTemplate | null>(null);
   const [config, setConfig] = useState<QuizConfig>({});
+  const [isPublic, setIsPublic] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const handlePublish = async () => {
@@ -29,6 +31,7 @@ export const CreateQuiz: React.FC = () => {
         config,
         createdAt: serverTimestamp(),
         playCount: 0,
+        isPublic,
       };
 
       await addDoc(collection(db, 'published_quizzes'), quizData);
@@ -170,11 +173,7 @@ export const CreateQuiz: React.FC = () => {
             )}
 
             {template === 'map' && (
-              <div className="rounded-2xl bg-black/5 p-8 text-center">
-                <MapPin className="mx-auto mb-4 h-12 w-12 text-black/20" />
-                <h3 className="text-lg font-bold">Map Editor Coming Soon</h3>
-                <p className="mt-2 text-black/60">For now, try the Wordle or List templates!</p>
-              </div>
+              <MapEditor onUpdate={(mapConfig) => setConfig({ ...config, map: mapConfig })} />
             )}
 
             <div className="flex justify-between pt-8">
@@ -186,7 +185,7 @@ export const CreateQuiz: React.FC = () => {
               </button>
               <button
                 onClick={() => setStep(3)}
-                disabled={!title || (template === 'wordle' && !config.wordle?.secretWord) || (template === 'list' && (!config.list?.prompt || config.list.answers.length === 0))}
+                disabled={!title || (template === 'wordle' && !config.wordle?.secretWord) || (template === 'list' && (!config.list?.prompt || config.list.answers.length === 0)) || (template === 'map' && (!config.map?.locations || config.map.locations.length === 0))}
                 className="flex items-center gap-2 rounded-full bg-black px-8 py-3 font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 <span>Next</span>
@@ -229,6 +228,43 @@ export const CreateQuiz: React.FC = () => {
                     <span className="font-bold text-black">{config.list?.answers.length} items</span>
                   </div>
                 )}
+                {template === 'map' && (
+                  <div className="flex justify-between border-b border-black/5 pb-2">
+                    <span>Locations</span>
+                    <span className="font-bold text-black">{config.map?.locations.length} points</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <label className="text-sm font-semibold uppercase tracking-wider text-black/40">Visibility</label>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setIsPublic(true)}
+                    className={cn(
+                      "flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 py-4 font-bold transition-all",
+                      isPublic ? "border-black bg-black text-white" : "border-black/5 bg-white hover:border-black/20"
+                    )}
+                  >
+                    <Globe className="h-5 w-5" />
+                    <span>Public</span>
+                  </button>
+                  <button
+                    onClick={() => setIsPublic(false)}
+                    className={cn(
+                      "flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 py-4 font-bold transition-all",
+                      !isPublic ? "border-black bg-black text-white" : "border-black/5 bg-white hover:border-black/20"
+                    )}
+                  >
+                    <Lock className="h-5 w-5" />
+                    <span>Private</span>
+                  </button>
+                </div>
+                <p className="text-center text-xs text-black/40">
+                  {isPublic 
+                    ? "Everyone can discover this quiz on the home page." 
+                    : "Only people with the link can access this quiz."}
+                </p>
               </div>
             </div>
 

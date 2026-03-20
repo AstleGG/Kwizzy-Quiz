@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { db, collection, query, orderBy, onSnapshot } from '../firebase';
+import { db, collection, query, orderBy, onSnapshot, where } from '../firebase';
 import { Quiz } from '../types';
 import { Link } from 'react-router-dom';
-import { Play, User, Clock, TrendingUp } from 'lucide-react';
+import { Play, User, Clock, TrendingUp, Globe, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const Home: React.FC = () => {
@@ -10,7 +10,11 @@ export const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'published_quizzes'), orderBy('createdAt', 'desc'));
+    const q = query(
+      collection(db, 'published_quizzes'), 
+      where('isPublic', '==', true),
+      orderBy('createdAt', 'desc')
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const quizData = snapshot.docs.map((doc) => ({
         id: doc.id,

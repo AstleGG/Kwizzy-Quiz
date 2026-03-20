@@ -5,10 +5,12 @@ export interface QuizConfig {
     secretWord: string;
   };
   map?: {
+    mapType: 'world' | 'africa' | 'asia' | 'europe' | 'north-america' | 'south-america' | 'oceania';
     locations: {
+      id: string;
       name: string;
-      lat: number;
-      lng: number;
+      x: number; // percentage 0-100
+      y: number; // percentage 0-100
     }[];
   };
   list?: {
@@ -26,6 +28,7 @@ export interface Quiz {
   config: QuizConfig;
   createdAt: any;
   playCount: number;
+  isPublic: boolean;
 }
 
 export interface UserProfile {
@@ -34,4 +37,7 @@ export interface UserProfile {
   email: string;
   photoURL?: string;
   role: 'user' | 'admin';
+  username?: string;
+  description?: string;
+  isProfileComplete?: boolean;
 }

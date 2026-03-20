@@ -34,9 +34,13 @@
         "playCount": {
           "type": "integer",
           "description": "Number of times the quiz has been played."
+        },
+        "isPublic": {
+          "type": "boolean",
+          "description": "Whether the quiz is visible to everyone."
         }
       },
-      "required": ["title", "creatorName", "creatorUid", "templateType", "config", "createdAt"]
+      "required": ["title", "creatorName", "creatorUid", "templateType", "config", "createdAt", "isPublic"]
     },
     "User": {
       "title": "User",
@@ -46,7 +50,10 @@
         "displayName": { "type": "string" },
         "email": { "type": "string" },
         "photoURL": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "admin"] }
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "username": { "type": "string", "description": "Unique @username" },
+        "description": { "type": "string" },
+        "isProfileComplete": { "type": "boolean" }
       },
       "required": ["displayName", "email", "role"]
     }

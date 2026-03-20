@@ -15,6 +15,7 @@ service cloud.firestore {
     //   - config: map (required)
     //   - createdAt: timestamp (required)
     //   - playCount: number (optional, defaults to 0)
+    //   - isPublic: bool (required)
     //
     // Collection: users
     // Document ID: auth.uid
@@ -23,6 +24,9 @@ service cloud.firestore {
     //   - email: string (required)
     //   - photoURL: string (optional)
     //   - role: string (required, enum: user, admin)
+    //   - username: string (optional)
+    //   - description: string (optional)
+    //   - isProfileComplete: bool (optional)
     //
     // ===============================================================
 
@@ -64,13 +68,16 @@ service cloud.firestore {
              data.creatorName is string && data.creatorName.size() > 0 && data.creatorName.size() <= 50 &&
              data.templateType in ['wordle', 'map', 'list'] &&
              data.config is map &&
-             data.createdAt is timestamp;
+             data.createdAt is timestamp &&
+             data.isPublic is bool;
     }
 
     function isValidUser(data) {
       return data.displayName is string && data.displayName.size() > 0 &&
              data.email is string && isValidEmail(data.email) &&
-             data.role in ['user', 'admin'];
+             data.role in ['user', 'admin'] &&
+             (!('username' in data) || (data.username is string && data.username.size() <= 30)) &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 500));
     }
 
     // ===============================================================
@@ -84,7 +91,8 @@ service cloud.firestore {
     }
 
     match /published_quizzes/{quizId} {
-      allow read: if true; // Publicly readable for discovery
+      allow get: if true; // Anyone with the ID can get the document (for private links)
+      allow list: if resource.data.isPublic == true; // Only public ones show in lists
       allow create: if isAuthenticated() && isValidQuiz(request.resource.data) && request.resource.data.creatorUid == request.auth.uid;
       allow update: if (isDocOwner() && isValidQuiz(request.resource.data) && request.resource.data.creatorUid == resource.data.creatorUid) ||
                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) && request.resource.data.playCount == resource.data.playCount + 1);
